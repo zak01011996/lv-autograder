@@ -1,0 +1,44 @@
+plugins {
+    id "com.vaadin" version "23.2.8"
+    id 'org.springframework.boot' version '2.7.5'
+    id 'io.spring.dependency-management' version '1.0.14.RELEASE'
+    id 'java'
+}
+
+group = 'lv.rtu'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '11'
+
+ext {
+    set('springBootVersion', '2.7.5')
+    set('vaadinVersion', "23.2.8")
+}
+
+repositories {
+    mavenCentral()
+    maven { url = "https://maven.vaadin.com/vaadin-addons" }
+}
+
+dependencies {
+    implementation "org.springframework.boot:spring-boot-starter-security:${springBootVersion}"
+    implementation "org.springframework.boot:spring-boot-starter-data-jpa:${springBootVersion}"
+    implementation 'org.postgresql:postgresql:42.5.0'
+    implementation("com.vaadin:vaadin-spring-boot-starter:${vaadinVersion}") {
+        exclude group: "com.vaadin:vaadin-core"
+    }
+
+    implementation "com.github.docker-java:docker-java-core:3.2.13"
+    implementation 'com.github.docker-java:docker-java-transport-httpclient5:3.2.13'
+
+    testImplementation "org.springframework.boot:spring-boot-starter-test:${springBootVersion}"
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "com.vaadin:vaadin-bom:${vaadinVersion}"
+    }
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
