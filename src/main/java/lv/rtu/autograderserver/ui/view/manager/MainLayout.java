@@ -26,7 +26,7 @@ import javax.validation.constraints.NotNull;
 public class MainLayout extends AppLayout {
     private SecurityService securityService;
 
-    public MainLayout(SecurityService securityService) {
+    public MainLayout(@NotNull SecurityService securityService) {
         this.securityService = securityService;
         createHeader();
         createDrawer();

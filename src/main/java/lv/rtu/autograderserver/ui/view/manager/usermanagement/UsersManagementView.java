@@ -12,11 +12,13 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.LocalDateTimeRenderer;
-import com.vaadin.flow.router.PageTitle;
+import com.vaadin.flow.router.HasDynamicTitle;
 import com.vaadin.flow.router.Route;
 import lv.rtu.autograderserver.model.User;
 import lv.rtu.autograderserver.service.UserService;
 import lv.rtu.autograderserver.ui.component.NotificationHelper;
+import lv.rtu.autograderserver.ui.component.form.PasswordResetForm;
+import lv.rtu.autograderserver.ui.component.form.UserForm;
 import lv.rtu.autograderserver.ui.view.manager.MainLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,8 +28,7 @@ import javax.validation.constraints.NotNull;
 
 @RolesAllowed("ROLE_ADMIN")
 @Route(value = "manager/users", layout = MainLayout.class)
-@PageTitle("Users management")
-public class UsersManagementView extends VerticalLayout {
+public class UsersManagementView extends VerticalLayout implements HasDynamicTitle {
     private final Logger logger = LoggerFactory.getLogger(UsersManagementView.class);
 
     private UserService userService;
@@ -66,10 +67,10 @@ public class UsersManagementView extends VerticalLayout {
                 userService.saveUser(data);
                 updateGridData();
 
-                NotificationHelper.displaySuccess(getTranslation("user_management_form_message_success"));
+                NotificationHelper.displaySuccess(getTranslation("user_form_message_success"));
                 dialog.close();
             } catch (Exception exception) {
-                NotificationHelper.displayError(getTranslation("user_management_form_message_error"));
+                NotificationHelper.displayError(getTranslation("user_form_message_error"));
                 logger.error("Cannot save user: ", exception);
             }
         });
@@ -92,10 +93,10 @@ public class UsersManagementView extends VerticalLayout {
                 userService.resetPassword(data.getId(), data.getPassword());
                 updateGridData();
 
-                NotificationHelper.displaySuccess(getTranslation("user_management_form_message_success"));
+                NotificationHelper.displaySuccess(getTranslation("user_form_message_success"));
                 dialog.close();
             } catch (Exception exception) {
-                NotificationHelper.displayError(getTranslation("user_management_form_message_error"));
+                NotificationHelper.displayError(getTranslation("user_form_message_error"));
                 logger.error("Cannot save user: ", exception);
             }
         });
@@ -188,5 +189,10 @@ public class UsersManagementView extends VerticalLayout {
 
     private void updateGridData() {
         grid.setItems(userService.fetchAll());
+    }
+
+    @Override
+    public String getPageTitle() {
+        return getTranslation("page_title_manager_user");
     }
 }

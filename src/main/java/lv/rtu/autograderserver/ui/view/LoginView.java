@@ -4,10 +4,7 @@ import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.login.LoginForm;
 import com.vaadin.flow.component.login.LoginI18n;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.router.BeforeEnterEvent;
-import com.vaadin.flow.router.BeforeEnterObserver;
-import com.vaadin.flow.router.PageTitle;
-import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.*;
 import lv.rtu.autograderserver.ui.component.LanguageSwitcher;
 
 /**
@@ -16,8 +13,7 @@ import lv.rtu.autograderserver.ui.component.LanguageSwitcher;
  * Source: https://vaadin.com/docs/latest/tutorial/login-and-authentication
  */
 @Route("login")
-@PageTitle("Login to autograder management panel")
-public class LoginView extends VerticalLayout implements BeforeEnterObserver {
+public class LoginView extends VerticalLayout implements BeforeEnterObserver, HasDynamicTitle {
     private final LoginForm loginForm = new LoginForm();
 
     public LoginView() {
@@ -64,5 +60,10 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
         res.setErrorMessage(i18nErrorMessage);
 
         return res;
+    }
+
+    @Override
+    public String getPageTitle() {
+        return getTranslation("page_title_login");
     }
 }

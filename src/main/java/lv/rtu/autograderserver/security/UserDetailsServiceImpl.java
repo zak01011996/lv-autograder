@@ -20,15 +20,21 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     private final UserService userService;
 
     private final String adminUsername;
+    private final String adminFirstName;
+    private final String adminLastName;
     private final String adminPassword;
 
     public UserDetailsServiceImpl(
             @NotNull UserService userService,
             @NotNull @Value("${app.superuser.username}") String adminUsername,
+            @NotNull @Value("${app.superuser.first_name}") String adminFirstName,
+            @NotNull @Value("${app.superuser.last_name}") String adminLastName,
             @NotNull @Value("${app.superuser.password}") String adminPassword
     ) {
         this.userService = userService;
         this.adminUsername = adminUsername;
+        this.adminFirstName = adminFirstName;
+        this.adminLastName = adminLastName;
         this.adminPassword = adminPassword;
     }
 
@@ -52,8 +58,8 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                 0,
                 adminUsername,
                 adminPassword,
-                "Admin",
-                "",
+                adminFirstName,
+                adminLastName,
                 true,
                 List.of("ROLE_ADMIN", "ROLE_USER")
         );

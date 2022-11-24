@@ -22,11 +22,11 @@ public class AuditMetadata {
 
     @Column(name = "created_by")
     @CreatedBy
-    private String createdBy;
+    private Long createdBy;
 
     @Column(name = "updated_by")
     @LastModifiedBy
-    private String updatedBy;
+    private Long updatedBy;
 
     public AuditMetadata() {
 
@@ -48,19 +48,19 @@ public class AuditMetadata {
         this.updatedAt = updatedAt;
     }
 
-    public String getCreatedBy() {
+    public Long getCreatedBy() {
         return createdBy;
     }
 
-    public void setCreatedBy(String createdBy) {
+    public void setCreatedBy(Long createdBy) {
         this.createdBy = createdBy;
     }
 
-    public String getUpdatedBy() {
+    public Long getUpdatedBy() {
         return updatedBy;
     }
 
-    public void setUpdatedBy(String updatedBy) {
+    public void setUpdatedBy(Long updatedBy) {
         this.updatedBy = updatedBy;
     }
 

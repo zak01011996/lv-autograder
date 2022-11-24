@@ -9,6 +9,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.LocalDateTimeRenderer;
+import com.vaadin.flow.router.HasDynamicTitle;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import lv.rtu.autograderserver.model.User;
@@ -20,9 +21,8 @@ import javax.annotation.security.PermitAll;
 
 @PermitAll
 @Route(value = "manager", layout = MainLayout.class)
-@PageTitle("Tasks management view")
-public class TaskListView extends VerticalLayout {
-    private final Logger logger = LoggerFactory.getLogger(TaskListView.class);
+public class TaskListView extends VerticalLayout implements HasDynamicTitle {
+    private final Logger logger = LoggerFactory.getLogger(getClass());
 
     public TaskListView() {
         add(new Label("TEST CONTENT"), new Label("TEST CONTENT 2"));
@@ -106,5 +106,10 @@ public class TaskListView extends VerticalLayout {
 //        })).setHeader(getTranslation("user_management_grid_actions"));
 //
 //        add(grid);
+    }
+
+    @Override
+    public String getPageTitle() {
+        return getTranslation("page_title_manager_tasks");
     }
 }

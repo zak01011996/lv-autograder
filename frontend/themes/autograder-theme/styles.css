@@ -5,3 +5,8 @@
 .left_menu {
     padding-left: 0.5em;
 }
+
+.bordered {
+    border: dimgray solid 1px;
+    border-radius: 5px;
+}

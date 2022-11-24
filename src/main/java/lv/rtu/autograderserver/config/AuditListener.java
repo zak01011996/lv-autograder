@@ -24,9 +24,9 @@ public class AuditListener {
 
             LocalDateTime now = LocalDateTime.now();
             audit.setCreatedAt(now);
-            audit.setCreatedBy(fetchUsername());
+            audit.setCreatedBy(fetchId());
             audit.setUpdatedAt(now);
-            audit.setUpdatedBy(fetchUsername());
+            audit.setUpdatedBy(fetchId());
         }
     }
 
@@ -41,17 +41,17 @@ public class AuditListener {
             }
 
             audit.setUpdatedAt(LocalDateTime.now());
-            audit.setUpdatedBy(fetchUsername());
+            audit.setUpdatedBy(fetchId());
         }
     }
 
-    private String fetchUsername() {
+    private Long fetchId() {
         SecurityContext context = SecurityContextHolder.getContext();
         Object principal = context.getAuthentication().getPrincipal();
-        if (principal instanceof LoggedInUser) {
-            return ((LoggedInUser) principal).getUsername();
+        if (!(principal instanceof LoggedInUser)) {
+            throw new RuntimeException("Cannot fetch logged in user");
         }
 
-        return "UNKNOWN";
+        return ((LoggedInUser) principal).getId();
     }
 }

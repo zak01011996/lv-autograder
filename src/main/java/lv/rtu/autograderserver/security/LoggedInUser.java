@@ -14,11 +14,11 @@ import java.util.stream.Collectors;
 public class LoggedInUser implements UserDetails {
 
     private final long id;
-    private final String email;
+    private String email;
+    private String firstName;
+    private String lastName;
     private final String password;
-    private final String firstName;
-    private final String lastName;
-    private boolean isActive;
+    private final boolean isActive;
     private final List<String> roles = new ArrayList<>();
 
     public LoggedInUser(long id, String email, String password, String firstName, String lastName, boolean isActive, List<String> roles) {
@@ -51,6 +51,18 @@ public class LoggedInUser implements UserDetails {
 
     public String getLastName() {
         return lastName;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 
     @Override

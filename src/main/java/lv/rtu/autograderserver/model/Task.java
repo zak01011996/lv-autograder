@@ -65,5 +65,4 @@ public class Task implements Auditable {
         this.auditMetadata = auditMetadata;
     }
 
-
 }

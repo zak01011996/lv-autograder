@@ -1,4 +1,4 @@
-package lv.rtu.autograderserver.ui.view.manager.usermanagement;
+package lv.rtu.autograderserver.ui.component.form;
 
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
@@ -24,8 +24,8 @@ public class PasswordResetForm extends FormLayout {
     private PasswordField passwordField = new PasswordField();
     private PasswordField confirmPasswordField = new PasswordField();
 
-    private Button saveBtn = new Button(getTranslation("user_management_form_btn_save"));
-    private Button cancelBtn = new Button(getTranslation("user_management_form_btn_cancel"));
+    private Button saveBtn = new Button(getTranslation("user_form_btn_save"));
+    private Button cancelBtn = new Button(getTranslation("user_form_btn_cancel"));
 
     private Consumer<User> saveCallback;
     private Consumer<User> cancelCallback;
@@ -39,7 +39,7 @@ public class PasswordResetForm extends FormLayout {
         setWidthFull();
         setResponsiveSteps(new ResponsiveStep("0", 1));
 
-        H3 title = new H3(getTranslation("user_management_password_reset_title"));
+        H3 title = new H3(getTranslation("user_form_password_reset_title"));
         title.getStyle().set("margin-bottom", "1.5em");
 
         saveBtn.addClickListener(event -> {
@@ -75,10 +75,10 @@ public class PasswordResetForm extends FormLayout {
 
     private void createForm() {
         passwordField.setWidthFull();
-        addFormItem(passwordField, getTranslation("user_management_form_password"));
+        addFormItem(passwordField, getTranslation("user_form_password"));
 
         confirmPasswordField.setWidthFull();
-        addFormItem(confirmPasswordField, getTranslation("user_management_form_confirm_password"));
+        addFormItem(confirmPasswordField, getTranslation("user_form_confirm_password"));
     }
 
     private void createBtnLayout() {
@@ -98,7 +98,7 @@ public class PasswordResetForm extends FormLayout {
         binder.forField(confirmPasswordField).withValidator((Validator<String>) (value, context) -> {
             if (passwordField.getValue().isEmpty() ||
                     !passwordField.getValue().equals(confirmPasswordField.getValue())) {
-                return ValidationResult.error(getTranslation("user_management_form_error_password"));
+                return ValidationResult.error(getTranslation("user_form_error_password"));
             }
 
             return ValidationResult.ok();

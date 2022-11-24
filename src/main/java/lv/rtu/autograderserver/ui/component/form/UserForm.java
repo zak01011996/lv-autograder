@@ -1,4 +1,4 @@
-package lv.rtu.autograderserver.ui.view.manager.usermanagement;
+package lv.rtu.autograderserver.ui.component.form;
 
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
@@ -34,8 +34,8 @@ public class UserForm extends FormLayout {
     private PasswordField passwordField = new PasswordField();
     private PasswordField confirmPasswordField = new PasswordField();
 
-    private Button saveBtn = new Button(getTranslation("user_management_form_btn_save"));
-    private Button cancelBtn = new Button(getTranslation("user_management_form_btn_cancel"));
+    private Button saveBtn = new Button(getTranslation("user_form_btn_save"));
+    private Button cancelBtn = new Button(getTranslation("user_form_btn_cancel"));
 
     private Consumer<User> saveCallback;
     private Consumer<User> cancelCallback;
@@ -50,7 +50,7 @@ public class UserForm extends FormLayout {
         setWidthFull();
         setResponsiveSteps(new ResponsiveStep("0", 1));
 
-        H3 title = new H3(getTranslation("user_management_form_title"));
+        H3 title = new H3(getTranslation("user_form_title"));
         title.getStyle().set("margin-bottom", "1.5em");
 
         saveBtn.addClickListener(event -> {
@@ -86,20 +86,20 @@ public class UserForm extends FormLayout {
 
     private void createForm() {
         emailField.setWidthFull();
-        addFormItem(emailField, getTranslation("user_management_form_email"));
+        addFormItem(emailField, getTranslation("user_form_email"));
 
         firstNameField.setWidthFull();
-        addFormItem(firstNameField, getTranslation("user_management_form_first_name"));
+        addFormItem(firstNameField, getTranslation("user_form_first_name"));
 
         lastNameField.setWidthFull();
-        addFormItem(lastNameField, getTranslation("user_management_form_last_name"));
+        addFormItem(lastNameField, getTranslation("user_form_last_name"));
 
         if (!isEditing) {
             passwordField.setWidthFull();
-            addFormItem(passwordField, getTranslation("user_management_form_password"));
+            addFormItem(passwordField, getTranslation("user_form_password"));
 
             confirmPasswordField.setWidthFull();
-            addFormItem(confirmPasswordField, getTranslation("user_management_form_confirm_password"));
+            addFormItem(confirmPasswordField, getTranslation("user_form_confirm_password"));
         }
     }
 
@@ -118,21 +118,21 @@ public class UserForm extends FormLayout {
 
     private void bindData() {
         binder.forField(emailField).withValidator(
-                new EmailValidator(getTranslation("user_management_form_error_email"))
+                new EmailValidator(getTranslation("user_form_error_email"))
         ).bind(
                 User::getEmail,
                 User::setEmail
         );
 
         binder.forField(firstNameField).withValidator(
-                new StringLengthValidator(getTranslation("user_management_form_error_first_name"), 1, null)
+                new StringLengthValidator(getTranslation("user_form_error_first_name"), 1, null)
         ).bind(
                 User::getFirstName,
                 User::setFirstName
         );
 
         binder.forField(lastNameField).withValidator(
-                new StringLengthValidator(getTranslation("user_management_form_error_last_name"), 1, null)
+                new StringLengthValidator(getTranslation("user_form_error_last_name"), 1, null)
         ).bind(
                 User::getLastName,
                 User::setLastName
@@ -143,7 +143,7 @@ public class UserForm extends FormLayout {
             binder.forField(confirmPasswordField).withValidator((Validator<String>) (value, context) -> {
                 if (passwordField.getValue().isEmpty() ||
                         !passwordField.getValue().equals(confirmPasswordField.getValue())) {
-                    return ValidationResult.error(getTranslation("user_management_form_error_password"));
+                    return ValidationResult.error(getTranslation("user_form_error_password"));
                 }
 
                 return ValidationResult.ok();

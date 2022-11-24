@@ -7,6 +7,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Component;
 
+import javax.validation.constraints.NotNull;
+
 /**
  * Author notes:
  * Code was taken and modified from official documentation
@@ -25,6 +27,17 @@ public class SecurityService {
 
         // Anonymous or no authentication.
         return null;
+    }
+
+    public void updateUserData(@NotNull String email, @NotNull String firstName, @NotNull String lastName) {
+        LoggedInUser user = getAuthenticatedUser();
+        if (user == null) {
+            return;
+        }
+
+        user.setEmail(email);
+        user.setFirstName(firstName);
+        user.setLastName(lastName);
     }
 
     public void logout() {
