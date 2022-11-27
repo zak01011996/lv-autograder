@@ -22,9 +22,13 @@ public class AuditListener {
                 auditable.setAudit(audit);
             }
 
+            // If it was already set, no need to overwrite it
+            if (audit.getCreatedBy() == null) {
+                audit.setCreatedBy(fetchId());
+            }
+
             LocalDateTime now = LocalDateTime.now();
             audit.setCreatedAt(now);
-            audit.setCreatedBy(fetchId());
             audit.setUpdatedAt(now);
             audit.setUpdatedBy(fetchId());
         }

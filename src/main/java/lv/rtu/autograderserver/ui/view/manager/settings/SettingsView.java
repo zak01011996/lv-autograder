@@ -46,12 +46,13 @@ public class SettingsView extends VerticalLayout implements HasDynamicTitle {
         LoggedInUser userInfo = securityService.getAuthenticatedUser();
 
         HorizontalLayout panel = new HorizontalLayout();
-        panel.setWidth(45, Unit.EM);
+        panel.setWidth(50, Unit.EM);
         panel.addClassNames("bordered");
 
 
         VerticalLayout userInfoLayout = new VerticalLayout();
         H3 userInfoTitle = new H3(getTranslation("settings_user_info_title"));
+        userInfoTitle.addClassNames("block_title");
         Span email = new Span(getTranslation("settings_info_email", userInfo.getUsername()));
         Span firstName = new Span(getTranslation("settings_info_first_name", userInfo.getFirstName()));
         Span lastName = new Span(getTranslation("settings_info_last_name", userInfo.getLastName()));
@@ -59,6 +60,7 @@ public class SettingsView extends VerticalLayout implements HasDynamicTitle {
 
         VerticalLayout actionsLayout = new VerticalLayout();
         H3 actionsTitle = new H3(getTranslation("settings_actions_title"));
+        actionsTitle.addClassNames("block_title");
         Button editBtn = new Button(getTranslation("settings_info_btn_edit"), VaadinIcon.EDIT.create());
         editBtn.setWidthFull();
         editBtn.addClickListener(event -> showUserForm());

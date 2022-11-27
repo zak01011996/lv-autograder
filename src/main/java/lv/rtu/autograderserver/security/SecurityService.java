@@ -49,4 +49,8 @@ public class SecurityService {
                 null
         );
     }
+
+    public boolean isAdmin() {
+        return getAuthenticatedUser().isAdmin();
+    }
 }

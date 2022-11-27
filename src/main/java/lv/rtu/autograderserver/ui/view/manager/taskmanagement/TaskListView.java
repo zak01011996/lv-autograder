@@ -1,111 +1,170 @@
 package lv.rtu.autograderserver.ui.view.manager.taskmanagement;
 
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.html.Label;
-import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.LocalDateTimeRenderer;
 import com.vaadin.flow.router.HasDynamicTitle;
-import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import lv.rtu.autograderserver.model.AuditMetadata;
+import lv.rtu.autograderserver.model.Task;
 import lv.rtu.autograderserver.model.User;
+import lv.rtu.autograderserver.security.SecurityService;
+import lv.rtu.autograderserver.service.TaskService;
+import lv.rtu.autograderserver.service.UserService;
+import lv.rtu.autograderserver.ui.component.NotificationHelper;
+import lv.rtu.autograderserver.ui.component.form.TaskForm;
 import lv.rtu.autograderserver.ui.view.manager.MainLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.security.PermitAll;
+import javax.validation.constraints.NotNull;
+import java.util.List;
 
 @PermitAll
 @Route(value = "manager", layout = MainLayout.class)
 public class TaskListView extends VerticalLayout implements HasDynamicTitle {
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    public TaskListView() {
-        add(new Label("TEST CONTENT"), new Label("TEST CONTENT 2"));
+    private final SecurityService securityService;
+    private final UserService userService;
+    private final TaskService taskService;
+    private User selectedUser;
+    private VerticalLayout mainContent;
+    private Grid<Task> taskGrid = new Grid<>();
+
+    public TaskListView(
+            @NotNull SecurityService securityService,
+            @NotNull UserService userService,
+            @NotNull TaskService taskService
+    ) {
+        this.securityService = securityService;
+        this.userService = userService;
+        this.taskService = taskService;
+
+        H2 title = new H2(getTranslation("task_management_title"));
+        add(title);
+
+        // Superuser is able to edit all tasks by any user
+        if (securityService.isAdmin()) {
+            List<User> userData = userService.fetchAll();
+            ComboBox<User> users = new ComboBox<>("Select user");
+            users.setWidthFull();
+            users.setItemLabelGenerator(user ->
+                    String.format("ID: %d, %s %s (%s)", user.getId(), user.getFirstName(), user.getLastName(), user.getEmail())
+            );
+            users.addValueChangeListener(event -> {
+                this.selectedUser = event.getValue();
+                createMainContent();
+                updateGridData();
+            });
+            users.setItems(userData);
+            users.setPlaceholder("Type to find user...");
+
+            add(users);
+        } else {
+            // If it's not superuser then selected user will be current user from session
+            selectedUser = userService.fetchUserById(securityService.getAuthenticatedUser().getId())
+                    .orElseThrow(() -> new RuntimeException("Not authorized"));
+
+            createMainContent();
+            updateGridData();
+        }
+    }
+
+    private void createMainContent() {
+        if (mainContent == null) {
+            mainContent = new VerticalLayout();
+            Button createNewTask = new Button(getTranslation("task_management_btn_create"), VaadinIcon.PLUS.create());
+            createNewTask.addClickListener(event -> showTaskForm(new Task()));
+
+            mainContent.add(createNewTask);
+            createGrid();
+
+            add(mainContent);
+        }
     }
 
     private void createGrid() {
-//        grid.setWidthFull();
-//        grid.addColumn(User::getId)
-//                .setHeader(getTranslation("user_management_grid_id"))
-//                .setFlexGrow(0)
-//                .setWidth("5em");
-//        grid.addColumn(User::getEmail)
-//                .setHeader(getTranslation("user_management_grid_email"))
-//                .setFlexGrow(0)
-//                .setWidth("17em");
-//
-//        grid.addColumn(User::getFirstName)
-//                .setHeader(getTranslation("user_management_grid_first_name"))
-//                .setFlexGrow(0)
-//                .setWidth("17em");
-//
-//        grid.addColumn(User::getLastName)
-//                .setHeader(getTranslation("user_management_grid_last_name"))
-//                .setFlexGrow(0)
-//                .setWidth("17em");
-//
-//        grid.addColumn(new LocalDateTimeRenderer<>(u -> u.getAudit().getCreatedAt(), "yyyy-MM-dd HH:mm:ss"))
-//                .setHeader(getTranslation("user_management_grid_created_at"))
-//                .setFlexGrow(0)
-//                .setWidth("15em");
-//
-//        grid.addColumn(new LocalDateTimeRenderer<>(u -> u.getAudit().getUpdatedAt(), "yyyy-MM-dd HH:mm:ss"))
-//                .setHeader(getTranslation("user_management_grid_updated_at"))
-//                .setFlexGrow(0)
-//                .setWidth("15em");
-//
-//        grid.addColumn(new ComponentRenderer<>(user -> {
-//                    Icon res = VaadinIcon.CHECK_CIRCLE.create();
-//                    res.setColor("green");
-//                    if (!user.isActive()) {
-//                        res = VaadinIcon.BAN.create();
-//                        res.setColor("red");
-//                    }
-//
-//                    return res;
-//                })).setHeader(getTranslation("user_management_grid_isactive"))
-//                .setFlexGrow(0)
-//                .setWidth("7em");
-//
-//        grid.addColumn(new ComponentRenderer<>(user -> {
-//            HorizontalLayout layout = new HorizontalLayout();
-//
-//            Button edit = new Button(getTranslation("user_management_grid_btn_edit"), VaadinIcon.EDIT.create());
-//            edit.addThemeVariants(ButtonVariant.LUMO_SMALL);
-//            edit.addClickListener(event -> showUserForm(user, true));
-//
-//            Button resetPassword = new Button(
-//                    getTranslation("user_management_grid_btn_reset_password"), VaadinIcon.PASSWORD.create());
-//            resetPassword.addThemeVariants(ButtonVariant.LUMO_SMALL);
-//            resetPassword.addClickListener(event -> showPasswordResetForm(user));
-//
-//            Button setEnabled = new Button(getTranslation("user_management_grid_btn_block"), VaadinIcon.BAN.create());
-//            setEnabled.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_ERROR);
-//            if (!user.isActive()) {
-//                setEnabled.setIcon(VaadinIcon.CHECK_CIRCLE_O.create());
-//                setEnabled.setText(getTranslation("user_management_grid_btn_activate"));
-//                setEnabled.removeThemeVariants(ButtonVariant.LUMO_ERROR);
-//                setEnabled.addThemeVariants(ButtonVariant.LUMO_SUCCESS);
-//            }
-//            setEnabled.addClickListener(event -> {
-//                try {
-//                    userService.toggleActive(user.getId());
-//                    updateGridData();
-//                } catch (Exception ex) {
-//                    logger.error("Cannot save user: ", ex);
-//                }
-//            });
-//
-//            layout.add(edit, resetPassword, setEnabled);
-//            return layout;
-//        })).setHeader(getTranslation("user_management_grid_actions"));
-//
-//        add(grid);
+        taskGrid.setWidthFull();
+        taskGrid.addColumn(Task::getId)
+                .setHeader(getTranslation("task_management_grid_id"))
+                .setFlexGrow(0)
+                .setWidth("5em");
+
+        taskGrid.addColumn(Task::getTitle).setHeader(getTranslation("task_management_grid_title"));
+
+        taskGrid.addColumn(new LocalDateTimeRenderer<>(u -> u.getAudit().getCreatedAt(), "yyyy-MM-dd HH:mm:ss"))
+                .setHeader(getTranslation("task_management_grid_created_at"));
+
+        taskGrid.addColumn(new LocalDateTimeRenderer<>(u -> u.getAudit().getUpdatedAt(), "yyyy-MM-dd HH:mm:ss"))
+                .setHeader(getTranslation("task_management_grid_updated_at"));
+
+        taskGrid.addColumn(new ComponentRenderer<>(user -> {
+            HorizontalLayout layout = new HorizontalLayout();
+
+            Button viewBtn = new Button(getTranslation("task_management_grid_btn_view"), VaadinIcon.EYE.create());
+            viewBtn.addThemeVariants(ButtonVariant.LUMO_SMALL);
+            viewBtn.addClickListener(event -> UI.getCurrent().navigate(TaskDetailsView.class, String.valueOf(user.getId())));
+
+            Button deleteBtn = new Button(getTranslation("task_management_grid_btn_delete"), VaadinIcon.TRASH.create());
+            deleteBtn.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_ERROR);
+            deleteBtn.addClickListener(event -> {});
+
+            layout.add(viewBtn, deleteBtn);
+            return layout;
+        })).setHeader(getTranslation("task_management_grid_actions"));
+
+        mainContent.add(taskGrid);
+    }
+
+    private void showTaskForm(@NotNull Task task) {
+        Dialog dialog = new Dialog();
+        dialog.setWidth(45, Unit.EM);
+        dialog.setCloseOnEsc(true);
+        dialog.setCloseOnOutsideClick(true);
+
+        TaskForm form = new TaskForm(task);
+        form.registerSaveCallback(data -> {
+            try {
+                // Tasks should be created under selected user, not under superuser
+                if (securityService.isAdmin()) {
+                    if (data.getAudit() == null) {
+                        data.setAudit(new AuditMetadata());
+                    }
+
+                    data.getAudit().setCreatedBy(selectedUser.getId());
+                }
+
+                taskService.saveTask(data);
+                updateGridData();
+
+                NotificationHelper.displaySuccess(getTranslation("task_form_message_success"));
+                dialog.close();
+            } catch (Exception exception) {
+                NotificationHelper.displayError(getTranslation("task_form_message_error"));
+                logger.error("Cannot save task: ", exception);
+            }
+        });
+
+        form.registerCancelCallback(data -> dialog.close());
+
+        dialog.add(form);
+        dialog.open();
+    }
+
+    private void updateGridData() {
+        taskGrid.setItems(taskService.fetchAllByUserId(selectedUser.getId()));
     }
 
     @Override

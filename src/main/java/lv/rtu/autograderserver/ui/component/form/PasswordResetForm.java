@@ -16,16 +16,17 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import javax.validation.constraints.NotNull;
 import java.util.function.Consumer;
 
+@SuppressWarnings("Duplicates")
 public class PasswordResetForm extends FormLayout {
 
-    private User userData;
-    private Binder<User> binder;
+    private final User userData;
+    private final Binder<User> binder;
 
-    private PasswordField passwordField = new PasswordField();
-    private PasswordField confirmPasswordField = new PasswordField();
+    private final PasswordField passwordField = new PasswordField();
+    private final PasswordField confirmPasswordField = new PasswordField();
 
-    private Button saveBtn = new Button(getTranslation("user_form_btn_save"));
-    private Button cancelBtn = new Button(getTranslation("user_form_btn_cancel"));
+    private final Button saveBtn = new Button(getTranslation("user_form_btn_save"));
+    private final Button cancelBtn = new Button(getTranslation("user_form_btn_cancel"));
 
     private Consumer<User> saveCallback;
     private Consumer<User> cancelCallback;

@@ -10,3 +10,7 @@
     border: dimgray solid 1px;
     border-radius: 5px;
 }
+
+.block_title {
+    margin-top: 0;
+}

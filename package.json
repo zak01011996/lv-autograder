@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@f0rce/lit-ace": "1.11.1",
     "@polymer/iron-icon": "3.0.1",
     "@polymer/iron-iconset-svg": "3.0.1",
     "@polymer/iron-list": "3.1.0",
@@ -230,10 +231,12 @@
     "@vaadin/virtual-list": "$@vaadin/virtual-list",
     "date-fns": "$date-fns",
     "lumo-css-framework": "$lumo-css-framework",
-    "line-awesome": "$line-awesome"
+    "line-awesome": "$line-awesome",
+    "@f0rce/lit-ace": "$@f0rce/lit-ace"
   },
   "vaadin": {
     "dependencies": {
+      "@f0rce/lit-ace": "1.11.1",
       "@polymer/iron-icon": "3.0.1",
       "@polymer/iron-iconset-svg": "3.0.1",
       "@polymer/iron-list": "3.1.0",
@@ -356,6 +359,6 @@
       "workbox-core": "6.5.0",
       "workbox-precaching": "6.5.0"
     },
-    "hash": "6cc97e504e3c3de958ef3615a27e45afa9b7dc86acb6f9da13896f834f2fd412"
+    "hash": "60ec0a95bdce32d4843ff6b740d9e99b8245a1938ed8748a14d7dd2fb7b1e145"
   }
 }

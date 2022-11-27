@@ -24,7 +24,7 @@ import javax.annotation.Nullable;
 import javax.validation.constraints.NotNull;
 
 public class MainLayout extends AppLayout {
-    private SecurityService securityService;
+    private final SecurityService securityService;
 
     public MainLayout(@NotNull SecurityService securityService) {
         this.securityService = securityService;
@@ -75,7 +75,8 @@ public class MainLayout extends AppLayout {
 
         Tab usersManagementView = createMenuNavigationItem(
                 getTranslation("left_menu_users"), VaadinIcon.USER_CARD, UsersManagementView.class);
-        if (securityService.getAuthenticatedUser().isAdmin()) {
+
+        if (securityService.isAdmin()) {
             menu.add(usersManagementView);
         }
 
