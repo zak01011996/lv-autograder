@@ -1,11 +1,9 @@
 package lv.rtu.autograderserver.ui.view.manager.taskmanagement;
 
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -15,14 +13,12 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.LocalDateTimeRenderer;
 import com.vaadin.flow.router.HasDynamicTitle;
 import com.vaadin.flow.router.Route;
-import lv.rtu.autograderserver.model.AuditMetadata;
+import com.vaadin.flow.router.RouteParameters;
 import lv.rtu.autograderserver.model.Task;
 import lv.rtu.autograderserver.model.User;
 import lv.rtu.autograderserver.security.SecurityService;
 import lv.rtu.autograderserver.service.TaskService;
 import lv.rtu.autograderserver.service.UserService;
-import lv.rtu.autograderserver.ui.component.NotificationHelper;
-import lv.rtu.autograderserver.ui.component.form.TaskForm;
 import lv.rtu.autograderserver.ui.view.manager.MainLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,6 +35,8 @@ public class TaskListView extends VerticalLayout implements HasDynamicTitle {
     private final SecurityService securityService;
     private final UserService userService;
     private final TaskService taskService;
+    private final TaskManagementShared shared;
+
     private User selectedUser;
     private VerticalLayout mainContent;
     private Grid<Task> taskGrid = new Grid<>();
@@ -46,11 +44,13 @@ public class TaskListView extends VerticalLayout implements HasDynamicTitle {
     public TaskListView(
             @NotNull SecurityService securityService,
             @NotNull UserService userService,
-            @NotNull TaskService taskService
+            @NotNull TaskService taskService,
+            @NotNull TaskManagementShared shared
     ) {
         this.securityService = securityService;
         this.userService = userService;
         this.taskService = taskService;
+        this.shared = shared;
 
         H2 title = new H2(getTranslation("task_management_title"));
         add(title);
@@ -86,7 +86,9 @@ public class TaskListView extends VerticalLayout implements HasDynamicTitle {
         if (mainContent == null) {
             mainContent = new VerticalLayout();
             Button createNewTask = new Button(getTranslation("task_management_btn_create"), VaadinIcon.PLUS.create());
-            createNewTask.addClickListener(event -> showTaskForm(new Task()));
+            createNewTask.addClickListener(event ->
+                    shared.showTaskForm(new Task(), selectedUser, res -> updateGridData())
+            );
 
             mainContent.add(createNewTask);
             createGrid();
@@ -110,57 +112,26 @@ public class TaskListView extends VerticalLayout implements HasDynamicTitle {
         taskGrid.addColumn(new LocalDateTimeRenderer<>(u -> u.getAudit().getUpdatedAt(), "yyyy-MM-dd HH:mm:ss"))
                 .setHeader(getTranslation("task_management_grid_updated_at"));
 
-        taskGrid.addColumn(new ComponentRenderer<>(user -> {
+        taskGrid.addColumn(new ComponentRenderer<>(task -> {
             HorizontalLayout layout = new HorizontalLayout();
 
             Button viewBtn = new Button(getTranslation("task_management_grid_btn_view"), VaadinIcon.EYE.create());
             viewBtn.addThemeVariants(ButtonVariant.LUMO_SMALL);
-            viewBtn.addClickListener(event -> UI.getCurrent().navigate(TaskDetailsView.class, String.valueOf(user.getId())));
+            viewBtn.addClickListener(event -> UI.getCurrent().navigate(
+                    TaskDetailsView.class, new RouteParameters("taskId", String.valueOf(task.getId()))));
 
             Button deleteBtn = new Button(getTranslation("task_management_grid_btn_delete"), VaadinIcon.TRASH.create());
             deleteBtn.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_ERROR);
-            deleteBtn.addClickListener(event -> {});
+            deleteBtn.addClickListener(event -> shared.showDeleteTaskDialog(task, () -> {
+                updateGridData();
+                return null;
+            }));
 
             layout.add(viewBtn, deleteBtn);
             return layout;
         })).setHeader(getTranslation("task_management_grid_actions"));
 
         mainContent.add(taskGrid);
-    }
-
-    private void showTaskForm(@NotNull Task task) {
-        Dialog dialog = new Dialog();
-        dialog.setWidth(45, Unit.EM);
-        dialog.setCloseOnEsc(true);
-        dialog.setCloseOnOutsideClick(true);
-
-        TaskForm form = new TaskForm(task);
-        form.registerSaveCallback(data -> {
-            try {
-                // Tasks should be created under selected user, not under superuser
-                if (securityService.isAdmin()) {
-                    if (data.getAudit() == null) {
-                        data.setAudit(new AuditMetadata());
-                    }
-
-                    data.getAudit().setCreatedBy(selectedUser.getId());
-                }
-
-                taskService.saveTask(data);
-                updateGridData();
-
-                NotificationHelper.displaySuccess(getTranslation("task_form_message_success"));
-                dialog.close();
-            } catch (Exception exception) {
-                NotificationHelper.displayError(getTranslation("task_form_message_error"));
-                logger.error("Cannot save task: ", exception);
-            }
-        });
-
-        form.registerCancelCallback(data -> dialog.close());
-
-        dialog.add(form);
-        dialog.open();
     }
 
     private void updateGridData() {

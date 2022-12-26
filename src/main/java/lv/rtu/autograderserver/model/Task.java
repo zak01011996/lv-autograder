@@ -4,6 +4,8 @@ package lv.rtu.autograderserver.model;
 import lv.rtu.autograderserver.config.AuditListener;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @EntityListeners(AuditListener.class)
@@ -18,6 +20,9 @@ public class Task implements Auditable {
 
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
+
+    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Problem> problems = new ArrayList<>();
 
     @Embedded
     private AuditMetadata auditMetadata;
@@ -55,6 +60,14 @@ public class Task implements Auditable {
         this.description = description;
     }
 
+    public List<Problem> getProblems() {
+        return problems;
+    }
+
+    public void setProblems(List<Problem> problems) {
+        this.problems = problems;
+    }
+
     @Override
     public AuditMetadata getAudit() {
         return auditMetadata;
@@ -65,4 +78,13 @@ public class Task implements Auditable {
         this.auditMetadata = auditMetadata;
     }
 
+    @Override
+    public String toString() {
+        return "Task{" +
+                "id=" + id +
+                ", title='" + title + '\'' +
+                ", description='" + description + '\'' +
+                ", auditMetadata=" + auditMetadata +
+                '}';
+    }
 }

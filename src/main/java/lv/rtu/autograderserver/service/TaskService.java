@@ -1,5 +1,6 @@
 package lv.rtu.autograderserver.service;
 
+import lv.rtu.autograderserver.model.Problem;
 import lv.rtu.autograderserver.model.Task;
 import lv.rtu.autograderserver.repository.TaskRepository;
 import org.slf4j.Logger;
@@ -32,7 +33,24 @@ public class TaskService {
         return taskRepository.findTaskByIdAndUserId(taskId, userId);
     }
 
-    public void saveTask(@NotNull Task task) {
-        taskRepository.save(task);
+    public Task saveTask(@NotNull Task task) {
+        return taskRepository.save(task);
+    }
+
+    public void deleteTask(@NotNull Task task) {
+        taskRepository.delete(task);
+    }
+
+    public Task createNewProblem(@NotNull Task task, @NotNull Problem problem) {
+        problem.setTask(task);
+        task.getProblems().add(problem);
+        return saveTask(task);
+    }
+
+    public Task deleteProblem(@NotNull Task task, @NotNull Problem problem) {
+        problem.setTask(null);
+        task.getProblems().removeIf(v -> v.equals(problem));
+
+        return saveTask(task);
     }
 }

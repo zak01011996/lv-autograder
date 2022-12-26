@@ -5,6 +5,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.H3;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.PasswordField;
@@ -111,7 +112,9 @@ public class UserForm extends FormLayout {
         cancelBtn.addClickShortcut(Key.ESCAPE);
 
         HorizontalLayout layout = new HorizontalLayout();
-        layout.getStyle().set("margin-top", "3em");
+        layout.getStyle().set("margin-top", "1.5em");
+        layout.setWidthFull();
+        layout.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
         layout.add(saveBtn, cancelBtn);
 
         add(layout);
