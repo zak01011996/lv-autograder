@@ -24,6 +24,9 @@ public class Task implements Auditable {
     @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Problem> problems = new ArrayList<>();
 
+    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Publication> publications = new ArrayList<>();
+
     @Embedded
     private AuditMetadata auditMetadata;
 
@@ -66,6 +69,14 @@ public class Task implements Auditable {
 
     public void setProblems(List<Problem> problems) {
         this.problems = problems;
+    }
+
+    public List<Publication> getPublications() {
+        return publications;
+    }
+
+    public void setPublications(List<Publication> publications) {
+        this.publications = publications;
     }
 
     @Override

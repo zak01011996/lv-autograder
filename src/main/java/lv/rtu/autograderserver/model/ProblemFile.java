@@ -40,27 +40,6 @@ public class ProblemFile implements Auditable {
         this.problem = problem;
     }
 
-    public ProblemFile(String fileName, String content, Problem problem) {
-        this.fileName = fileName;
-        this.content = content;
-        this.problem = problem;
-    }
-
-    public ProblemFile(String fileName, String content, boolean isSolutionTemplate, Problem problem) {
-        this.fileName = fileName;
-        this.content = content;
-        this.isSolutionTemplate = isSolutionTemplate;
-        this.problem = problem;
-    }
-
-    public ProblemFile(String fileName, String content, boolean isSolutionTemplate, boolean isContainerEntryPoint, Problem problem) {
-        this.fileName = fileName;
-        this.content = content;
-        this.isSolutionTemplate = isSolutionTemplate;
-        this.isContainerEntryPoint = isContainerEntryPoint;
-        this.problem = problem;
-    }
-
     public long getId() {
         return id;
     }

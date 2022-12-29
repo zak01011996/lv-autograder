@@ -1,9 +1,9 @@
 package lv.rtu.autograderserver.ui.view.manager.taskmanagement;
 
-import com.vaadin.flow.component.Html;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.details.Details;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.H2;
@@ -25,19 +25,27 @@ import lv.rtu.autograderserver.security.SecurityService;
 import lv.rtu.autograderserver.service.TaskService;
 import lv.rtu.autograderserver.ui.component.NotificationHelper;
 import lv.rtu.autograderserver.ui.component.form.NewProblemForm;
+import lv.rtu.autograderserver.ui.component.form.NewPublicationForm;
+import lv.rtu.autograderserver.ui.component.form.TaskForm;
 import lv.rtu.autograderserver.ui.view.manager.MainLayout;
+import org.apache.logging.log4j.util.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 
 import javax.annotation.security.PermitAll;
 import javax.validation.constraints.NotNull;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
+@JsModule("copytoclipboard.js")
 @PermitAll
 @Route(value = "manager/task/:taskId", layout = MainLayout.class)
 public class TaskDetailsView extends VerticalLayout implements BeforeEnterObserver, HasDynamicTitle {
     private final Logger logger = LoggerFactory.getLogger(getClass());
+
+    private final String solutionUrl;
 
     private final Grid<Problem> problemGrid = new Grid<>();
     private final Grid<Publication> publicationGrid = new Grid<>();
@@ -53,11 +61,14 @@ public class TaskDetailsView extends VerticalLayout implements BeforeEnterObserv
     public TaskDetailsView(
             @NotNull TaskService taskService,
             @NotNull SecurityService securityService,
-            @NotNull TaskManagementShared shared
+            @NotNull TaskManagementShared shared,
+            @Value("${app.solution_url}") String solutionUrl
     ) {
         this.securityService = securityService;
         this.taskService = taskService;
         this.shared = shared;
+
+        this.solutionUrl = solutionUrl;
     }
 
     @Override
@@ -93,13 +104,6 @@ public class TaskDetailsView extends VerticalLayout implements BeforeEnterObserv
         Button backBtn = new Button(getTranslation("go_back"), VaadinIcon.ARROW_BACKWARD.create());
         backBtn.addClickListener(event -> UI.getCurrent().navigate(TaskListView.class));
 
-        Button editTaskDetails = new Button(getTranslation("task_details_btn_edit"), VaadinIcon.EDIT.create());
-        editTaskDetails.addThemeVariants(ButtonVariant.LUMO_SUCCESS);
-        editTaskDetails.addClickListener(event -> shared.showTaskForm(taskData, null, task -> {
-            taskData = task;
-            fillMainContent();
-        }));
-
         Button deleteTaskBtn = new Button(getTranslation("task_details_btn_delete"), VaadinIcon.TRASH.create());
         deleteTaskBtn.addThemeVariants(ButtonVariant.LUMO_ERROR);
         deleteTaskBtn.addClickListener(event ->
@@ -111,37 +115,49 @@ public class TaskDetailsView extends VerticalLayout implements BeforeEnterObserv
 
         // Empty label to expand it
         Label emptySpace = new Label();
-        btnLayout.add(backBtn, emptySpace, editTaskDetails, deleteTaskBtn);
+        btnLayout.add(backBtn, emptySpace, deleteTaskBtn);
         btnLayout.expand(emptySpace);
 
         // Task other properties
-        Tab description = new Tab(getTranslation("task_details_tab_description"));
+        Tab details = new Tab(getTranslation("task_details_tab_details"));
         Tab problems = new Tab(getTranslation("task_details_tab_problems"));
         Tab publications = new Tab(getTranslation("task_details_tab_publications"));
 
         tabContent = new VerticalLayout();
 
-        Tabs tabs = new Tabs(description, problems, publications);
+        Tabs tabs = new Tabs(details, problems, publications);
         tabs.setWidthFull();
         tabs.addThemeVariants(TabsVariant.LUMO_EQUAL_WIDTH_TABS);
         tabs.addSelectedChangeListener(event -> {
-            if (event.getSelectedTab().equals(description)) {
-                fillDescriptionContent();
+            if (event.getSelectedTab().equals(details)) {
+                fillTaskDetails();
             } else if (event.getSelectedTab().equals(problems)) {
                 fillProblemsContent();
             } else if (event.getSelectedTab().equals(publications)) {
                 fillPublicationsContent();
             }
         });
-        tabs.setSelectedTab(description);
-        fillDescriptionContent();
+        tabs.setSelectedTab(details);
+        fillTaskDetails();
 
         mainContent.add(title, btnLayout, tabs, tabContent);
     }
 
-    private void fillDescriptionContent() {
+    private void fillTaskDetails() {
         tabContent.removeAll();
-        tabContent.add(new Html(String.format("<div>%s</div>", taskData.getDescription())));
+
+        TaskForm form = new TaskForm(taskData, false, false);
+        form.registerSaveCallback(data -> {
+            try {
+                taskData = taskService.saveTask(data);
+                NotificationHelper.displaySuccess(getTranslation("task_form_message_success"));
+            } catch (Exception exception) {
+                NotificationHelper.displayError(getTranslation("task_form_message_error"));
+                logger.error("Cannot save task: ", exception);
+            }
+        });
+
+        tabContent.add(form);
     }
 
     private void fillProblemsContent() {
@@ -199,18 +215,107 @@ public class TaskDetailsView extends VerticalLayout implements BeforeEnterObserv
         problemGrid.setItems(taskData.getProblems());
 
         layout.add(problemGrid);
-
         tabContent.add(layout);
     }
 
     private void fillPublicationsContent() {
         tabContent.removeAll();
         publicationGrid.removeAllColumns();
+
+        VerticalLayout layout = new VerticalLayout();
+
+        NewPublicationForm form = new NewPublicationForm();
+        form.setWidthFull();
+        form.registerSaveCallback(publication -> {
+            try {
+                taskData = taskService.createNewPublication(taskData, publication);
+                publicationGrid.setItems(taskData.getPublications());
+                form.reset();
+
+                NotificationHelper.displaySuccess(getTranslation("publication_form_message_success"));
+            } catch (Exception ex) {
+                logger.error("Got error during saving publication", ex);
+                NotificationHelper.displayError(getTranslation("publication_form_message_error"));
+            }
+        });
+
+        layout.add(form);
+
+        publicationGrid.addColumn(Publication::getId)
+                .setHeader(getTranslation("task_details_publication_grid_id"))
+                .setFlexGrow(0)
+                .setWidth("5em");
+
+        publicationGrid.addColumn(Publication::getPublicId)
+                .setHeader(getTranslation("task_details_publication_grid_public_id"));
+
+        publicationGrid.addColumn(new ComponentRenderer<>(this::getPublicationStatus))
+                .setHeader(getTranslation("task_details_publication_grid_status"));
+
+        publicationGrid.addColumn(new LocalDateTimeRenderer<>(Publication::getAvailableFrom, "yyyy-MM-dd HH:mm:ss"))
+                .setHeader(getTranslation("task_details_publication_grid_available_from"));
+
+        publicationGrid.addColumn(new LocalDateTimeRenderer<>(Publication::getAvailableTo, "yyyy-MM-dd HH:mm:ss"))
+                .setHeader(getTranslation("task_details_publication_grid_available_to"));
+
+        publicationGrid.addColumn(new ComponentRenderer<>(publication -> {
+            if (Strings.isEmpty(publication.getPassword())) {
+                return VaadinIcon.BAN.create();
+            }
+
+            return VaadinIcon.LOCK.create();
+        })).setHeader(getTranslation("task_details_publication_grid_is_secured"));
+
+        publicationGrid.addColumn(new ComponentRenderer<>(publication -> {
+            HorizontalLayout actionsLayout = new HorizontalLayout();
+
+            Button viewBtn = new Button(
+                    getTranslation("task_details_publication_grid_action_view"), VaadinIcon.EYE.create());
+            viewBtn.addThemeVariants(ButtonVariant.LUMO_SMALL);
+            viewBtn.addClickListener(event -> navigateToPublicationPage(publication.getId()));
+
+            Button copyLink = new Button(
+                    getTranslation("task_details_publication_grid_action_copy_link"), VaadinIcon.COPY_O.create());
+            copyLink.addThemeVariants(ButtonVariant.LUMO_SMALL);
+            copyLink.addClickListener(event -> {
+                UI.getCurrent().getPage().executeJs("window.copyToClipboard($0)",
+                        solutionUrl.replace("{0}", publication.getPublicId()));
+                NotificationHelper.displaySuccess(getTranslation("task_details_publication_msg_link_copied"));
+            });
+
+            actionsLayout.add(viewBtn, copyLink);
+
+            return actionsLayout;
+        })).setHeader(getTranslation("task_details_publication_grid_actions"));
+
+        publicationGrid.setItems(taskData.getPublications());
+
+        layout.add(publicationGrid);
+        tabContent.add(layout);
     }
 
     @Override
     public String getPageTitle() {
         return getTranslation("page_title_task_details", taskData.getTitle());
+    }
+
+    private Label getPublicationStatus(Publication publication) {
+        Label res = new Label();
+        LocalDateTime currentTime = LocalDateTime.now();
+
+        if (publication.getAvailableFrom().isAfter(currentTime)) {
+            res.setText(getTranslation("task_details_publication_status_pending"));
+            res.getStyle().set("color", "orange");
+        } else if (publication.getAvailableFrom().isBefore(currentTime)
+                && publication.getAvailableTo().isAfter(currentTime)) {
+            res.setText(getTranslation("task_details_publication_status_ongoing"));
+            res.getStyle().set("color", "green");
+        } else {
+            res.setText(getTranslation("task_details_publication_status_expired"));
+            res.getStyle().set("color", "grey");
+        }
+
+        return res;
     }
 
     private void navigateToProblemConfiguration(long problemId) {
@@ -219,5 +324,13 @@ public class TaskDetailsView extends VerticalLayout implements BeforeEnterObserv
         params.put("problemId", String.valueOf(problemId));
 
         UI.getCurrent().navigate(ProblemConfigurationView.class, new RouteParameters(params));
+    }
+
+    private void navigateToPublicationPage(long problemId) {
+        Map<String, String> params = new HashMap<>();
+        params.put("taskId", String.valueOf(taskData.getId()));
+        params.put("publicationId", String.valueOf(problemId));
+
+        UI.getCurrent().navigate(PublicationView.class, new RouteParameters(params));
     }
 }

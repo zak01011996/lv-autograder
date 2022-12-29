@@ -118,12 +118,6 @@ public class ProblemConfigurationView extends VerticalLayout implements BeforeEn
     }
 
     private Component createFileEditorLayout() {
-//        problemData.getFiles().addAll(List.of(
-//                new ProblemFile("test.txt", "blah, blah, blah aaopisdjk0aosjdpaos", problemData),
-//                new ProblemFile("test2.txt", "Some other content...", problemData),
-//                new ProblemFile("run.sh", "cd /app && ls -ahl", false, true, problemData),
-//                new ProblemFile("Solution.java", "package com.solution;\n\npublic class Solution {\n\n    public static int solution() {\n        //TODO: Student solution goes here...\n    }\n}", true, problemData)
-//        ));
         return new ProblemFileEditor(problemData);
     }
 

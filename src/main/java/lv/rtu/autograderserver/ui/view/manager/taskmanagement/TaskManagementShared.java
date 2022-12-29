@@ -5,6 +5,7 @@ import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.dialog.Dialog;
 import lv.rtu.autograderserver.model.AuditMetadata;
+import lv.rtu.autograderserver.model.Publication;
 import lv.rtu.autograderserver.model.Task;
 import lv.rtu.autograderserver.model.User;
 import lv.rtu.autograderserver.security.SecurityService;
@@ -90,6 +91,32 @@ public class TaskManagementShared {
                     cb.call();
                 }
 
+            } catch (Exception ex) {
+                logger.error("Cannot delete task", ex);
+                NotificationHelper.displayError(getTranslation("task_details_message_deleted_error"));
+            }
+        });
+
+        dialog.open();
+    }
+
+    @SuppressWarnings("Duplicates")
+    public void showDeletePublicationDialog(@NotNull Task taskData, @NotNull Publication publication, @Nullable Callable<Void> cb) {
+        ConfirmDialog dialog = new ConfirmDialog();
+        dialog.setCancelable(true);
+        dialog.setHeader(getTranslation("confirm_dialog_title"));
+        dialog.setText(getTranslation("confirm_dialog_text_delete_publication"));
+        dialog.setConfirmText(getTranslation("confirm_dialog_btn_delete"));
+        dialog.setConfirmButtonTheme("error primary");
+        dialog.setCancelText(getTranslation("confirm_dialog_btn_cancel"));
+        dialog.addConfirmListener(event1 -> {
+            try {
+                taskService.deletePublication(taskData, publication);
+                NotificationHelper.displaySuccess(getTranslation("task_details_message_publication_deleted"));
+
+                if (cb != null) {
+                    cb.call();
+                }
             } catch (Exception ex) {
                 logger.error("Cannot delete task", ex);
                 NotificationHelper.displayError(getTranslation("task_details_message_deleted_error"));

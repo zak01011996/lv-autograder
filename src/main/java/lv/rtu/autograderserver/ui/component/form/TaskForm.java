@@ -34,6 +34,10 @@ public class TaskForm extends FormLayout {
     private Consumer<Task> cancelCallback;
 
     public TaskForm(@NotNull Task taskData) {
+        this(taskData, true, true);
+    }
+
+    public TaskForm(@NotNull Task taskData, boolean showTitle, boolean showCancelBtn) {
         this.taskData = taskData;
 
         this.binder = new Binder<>(Task.class);
@@ -42,8 +46,6 @@ public class TaskForm extends FormLayout {
         setWidthFull();
         setResponsiveSteps(new ResponsiveStep("0", 1));
 
-        H3 title = new H3(getTranslation("task_form_title"));
-        title.getStyle().set("margin-bottom", "1.5em");
 
         saveBtn.addClickListener(event -> {
             if (saveCallback != null) {
@@ -60,10 +62,14 @@ public class TaskForm extends FormLayout {
         });
 
         // Set title
-        add(title);
+        if (showTitle) {
+            H3 title = new H3(getTranslation("task_form_title"));
+            title.getStyle().set("margin-bottom", "1.5em");
+            add(title);
+        }
 
         createForm();
-        createBtnLayout();
+        createBtnLayout(showCancelBtn);
 
         bindData();
     }
@@ -90,17 +96,20 @@ public class TaskForm extends FormLayout {
     }
 
     @SuppressWarnings("Duplicates")
-    private void createBtnLayout() {
-        saveBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        saveBtn.addClickShortcut(Key.ENTER);
-
-        cancelBtn.addClickShortcut(Key.ESCAPE);
-
+    private void createBtnLayout(boolean showCancelBtn) {
         HorizontalLayout layout = new HorizontalLayout();
         layout.getStyle().set("margin-top", "1.5em");
         layout.setWidthFull();
         layout.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
-        layout.add(saveBtn, cancelBtn);
+
+        saveBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        saveBtn.addClickShortcut(Key.ENTER);
+        layout.add(saveBtn);
+
+        if (showCancelBtn) {
+            cancelBtn.addClickShortcut(Key.ESCAPE);
+            layout.add(cancelBtn);
+        }
 
         add(layout);
     }
