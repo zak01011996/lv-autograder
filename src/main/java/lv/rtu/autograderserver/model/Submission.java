@@ -16,6 +16,12 @@ public class Submission implements Auditable {
     @Enumerated(EnumType.STRING)
     private SubmissionStatus status;
 
+    @Column(name = "score")
+    private int score;
+
+    @Column(name = "maxScore")
+    private int maxScore;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "participant_id")
     private Participant participant;

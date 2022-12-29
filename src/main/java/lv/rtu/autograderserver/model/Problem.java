@@ -25,6 +25,9 @@ public class Problem implements Auditable {
     @Enumerated(EnumType.STRING)
     private SandboxType sandboxType;
 
+    @Column(name = "max_score")
+    private int maxScore = 0;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "task_id")
     private Task task;
@@ -69,6 +72,14 @@ public class Problem implements Auditable {
 
     public void setSandboxType(SandboxType sandboxType) {
         this.sandboxType = sandboxType;
+    }
+
+    public int getMaxScore() {
+        return maxScore;
+    }
+
+    public void setMaxScore(int maxScore) {
+        this.maxScore = maxScore;
     }
 
     public Task getTask() {

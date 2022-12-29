@@ -204,7 +204,7 @@ public class TaskDetailsView extends VerticalLayout implements BeforeEnterObserv
 
             Button configureBtn = new Button(
                     getTranslation("task_details_problem_grid_action_configure"), VaadinIcon.COG.create());
-
+            configureBtn.addThemeVariants(ButtonVariant.LUMO_SMALL);
             configureBtn.addClickListener(event -> navigateToProblemConfiguration(problem.getId()));
 
             actionsLayout.add(configureBtn);

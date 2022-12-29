@@ -13,6 +13,7 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.listbox.ListBox;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.*;
 import lv.rtu.autograderserver.model.Problem;
@@ -28,6 +29,7 @@ import org.vaadin.tinymce.TinyMce;
 
 import javax.annotation.security.PermitAll;
 import javax.validation.constraints.NotNull;
+import java.util.Optional;
 
 @PermitAll
 @Route(value = "manager/task/:taskId/problem/:problemId", layout = MainLayout.class)
@@ -41,6 +43,7 @@ public class ProblemConfigurationView extends VerticalLayout implements BeforeEn
     private Problem problemData;
 
     private final TextField titleField = new TextField();
+    private final IntegerField maxScoreField = new IntegerField();
     private final TinyMce descriptionField = new TinyMce();
 
     public ProblemConfigurationView(@NotNull TaskService taskService, @NotNull SecurityService securityService) {
@@ -103,12 +106,19 @@ public class ProblemConfigurationView extends VerticalLayout implements BeforeEn
         titleField.setValue(problemData.getTitle());
         titleField.addValueChangeListener(event -> problemData.setTitle(event.getValue()));
 
+        maxScoreField.setWidthFull();
+        maxScoreField.setPlaceholder(getTranslation("problem_details_max_score_placeholder"));
+        maxScoreField.setMin(0);
+        maxScoreField.setValue(problemData.getMaxScore());
+        maxScoreField.addValueChangeListener(event -> problemData.setMaxScore(Optional.ofNullable(event.getValue()).orElse(0)));
+
         descriptionField.setWidthFull();
         descriptionField.configure("menubar", false);
         descriptionField.setValue(problemData.getDescription());
         descriptionField.addValueChangeListener(event -> problemData.setDescription(event.getValue()));
 
         form.addFormItem(titleField, getTranslation("problem_details_title_label"));
+        form.addFormItem(maxScoreField, getTranslation("problem_details_max_score_label"));
         form.addFormItem(descriptionField, getTranslation("problem_details_description_label"));
 
         form.add(new Hr());
