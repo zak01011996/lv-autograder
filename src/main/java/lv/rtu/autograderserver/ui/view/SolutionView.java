@@ -7,7 +7,7 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 
 @AnonymousAllowed
-@Route("/solution")
+@Route("/solution/:publicationId")
 public class SolutionView extends VerticalLayout implements HasDynamicTitle {
     public SolutionView() {
         add(new H1("Hello, this is Home view"));
