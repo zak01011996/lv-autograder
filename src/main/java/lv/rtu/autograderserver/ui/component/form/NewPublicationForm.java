@@ -81,7 +81,7 @@ public class NewPublicationForm extends FormLayout {
 
         timeLimitField.setLabel(getTranslation("publication_form_time_limit"));
 
-        passwordField.setLabel(getTranslation("publication_form_time_limit"));
+        passwordField.setLabel(getTranslation("publication_form_password"));
         passwordField.setRevealButtonVisible(true);
 
         saveBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);

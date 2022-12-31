@@ -24,6 +24,9 @@ public class SecurityConfig extends VaadinWebSecurity {
         // Solution page should not go under security
         http.authorizeRequests().antMatchers("/solve/**").permitAll();
 
+        // Solution page should not go under security
+        http.authorizeRequests().antMatchers("/ace-builds/**").permitAll();
+
         super.configure(http);
 
         setLoginView(http, LoginView.class);

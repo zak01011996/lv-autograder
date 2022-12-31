@@ -7,7 +7,6 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Label;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.HasDynamicTitle;
@@ -15,7 +14,6 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import lv.rtu.autograderserver.ui.component.LanguageSwitcher;
-import lv.rtu.autograderserver.ui.view.manager.taskmanagement.PublicationView;
 
 @AnonymousAllowed
 @Route("")
@@ -55,7 +53,7 @@ public class HomeView extends VerticalLayout implements HasDynamicTitle {
                 return;
             }
 
-            UI.getCurrent().navigate(SolutionView.class,
+            UI.getCurrent().navigate(AssignmentView.class,
                     new RouteParameters("publicationId", publicationIdField.getValue()));
         });
 

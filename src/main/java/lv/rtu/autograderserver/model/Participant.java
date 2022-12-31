@@ -1,15 +1,13 @@
 package lv.rtu.autograderserver.model;
 
-import lv.rtu.autograderserver.config.AuditListener;
-
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.UUID;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
-@EntityListeners(AuditListener.class)
-@Table(name = "participants")
-public class Participant implements Auditable {
+@Table(name = "participants", uniqueConstraints = @UniqueConstraint(columnNames = {"publication_id", "identifier"}))
+public class Participant {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
@@ -20,23 +18,72 @@ public class Participant implements Auditable {
     @Column(name = "last_name")
     private String lastName;
 
-    @Column(name = "identifier", unique = true)
+    @Column(name = "identifier")
     private String identifier;
+
+    @Column(name = "start_date")
+    private LocalDateTime startedAt;
+
+    @OneToMany(mappedBy = "participant", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Submission> submissions = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "publication_id")
     private Publication publication;
 
-    @Embedded
-    private AuditMetadata auditMetadata;
-
-    @Override
-    public AuditMetadata getAudit() {
-        return auditMetadata;
+    public long getId() {
+        return id;
     }
 
-    @Override
-    public void setAudit(AuditMetadata metadata) {
-        this.auditMetadata = metadata;
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public String getIdentifier() {
+        return identifier;
+    }
+
+    public void setIdentifier(String identifier) {
+        this.identifier = identifier;
+    }
+
+    public Publication getPublication() {
+        return publication;
+    }
+
+    public void setPublication(Publication publication) {
+        this.publication = publication;
+    }
+
+    public LocalDateTime getStartedAt() {
+        return startedAt;
+    }
+
+    public void setStartedAt(LocalDateTime startedAt) {
+        this.startedAt = startedAt;
+    }
+
+    public List<Submission> getSubmissions() {
+        return submissions;
+    }
+
+    public void setSubmissions(List<Submission> submissions) {
+        this.submissions = submissions;
     }
 }
