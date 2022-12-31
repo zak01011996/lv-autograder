@@ -21,8 +21,11 @@ public class Participant {
     @Column(name = "identifier")
     private String identifier;
 
-    @Column(name = "start_date")
+    @Column(name = "started_at")
     private LocalDateTime startedAt;
+
+    @Column(name = "submitted_at")
+    private LocalDateTime submittedAt;
 
     @OneToMany(mappedBy = "participant", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Submission> submissions = new ArrayList<>();
@@ -77,6 +80,14 @@ public class Participant {
 
     public void setStartedAt(LocalDateTime startedAt) {
         this.startedAt = startedAt;
+    }
+
+    public LocalDateTime getSubmittedAt() {
+        return submittedAt;
+    }
+
+    public void setSubmittedAt(LocalDateTime submittedAt) {
+        this.submittedAt = submittedAt;
     }
 
     public List<Submission> getSubmissions() {

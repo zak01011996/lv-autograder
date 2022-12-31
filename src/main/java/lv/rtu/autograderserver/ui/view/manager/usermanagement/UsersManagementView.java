@@ -147,7 +147,7 @@ public class UsersManagementView extends VerticalLayout implements HasDynamicTit
             }
 
             return res;
-        })).setHeader(getTranslation("user_management_grid_isactive"))
+        })).setHeader(getTranslation("user_management_grid_is_active"))
                 .setFlexGrow(0)
                 .setWidth("7em");
 

@@ -15,10 +15,7 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.router.BeforeEnterEvent;
-import com.vaadin.flow.router.BeforeEnterObserver;
-import com.vaadin.flow.router.HasDynamicTitle;
-import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.*;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import lv.rtu.autograderserver.model.Participant;
 import lv.rtu.autograderserver.model.Publication;
@@ -85,8 +82,15 @@ public class AssignmentView extends AppLayout implements BeforeEnterObserver, Ha
                 return;
             }
 
-            initNavBar();
+            // Already was submitted
+            if (participantData.getSubmittedAt() != null) {
+                VerticalLayout submittedMsg = createSubmittedMessage();
+                mainContent.add(submittedMsg);
+                mainContent.setHorizontalComponentAlignment(FlexComponent.Alignment.CENTER, submittedMsg);
+                return;
+            }
 
+            initNavBar();
             AssignmentExplorer assignmentExplorer = createAssignmentExplorer();
             mainContent.add(assignmentExplorer);
         } catch (Exception ex) {
@@ -95,21 +99,6 @@ public class AssignmentView extends AppLayout implements BeforeEnterObserver, Ha
             mainContent.add(errorLayout);
             mainContent.setHorizontalComponentAlignment(FlexComponent.Alignment.CENTER, errorLayout);
         }
-    }
-
-    private AssignmentExplorer createAssignmentExplorer() {
-        AssignmentExplorer assignmentExplorer = new AssignmentExplorer(participantData);
-        assignmentExplorer.setSizeFull();
-        assignmentExplorer.registerCallback(participant -> {
-            try {
-                participantData = participantService.saveParticipantData(participant);
-                storeParticipantDataInSession(participantData);
-            } catch (Exception ex) {
-                logger.error("Cannot save participant data");
-                NotificationHelper.displayError(getTranslation("participant_reg_form_error_msg"));
-            }
-        });
-        return assignmentExplorer;
     }
 
     private void initNavBar() {
@@ -127,11 +116,11 @@ public class AssignmentView extends AppLayout implements BeforeEnterObserver, Ha
         timer.setFractions(false);
 
         timer.start();
-        timer.addTimerEndEvent(event -> NotificationHelper.displaySuccess("Timer ended!"));
+        timer.addTimerEndEvent(event -> submitSolution());
 
         Button submitBtn = new Button(getTranslation("assignment_view_btn_submit"), VaadinIcon.PAPERPLANE.create());
         submitBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        submitBtn.addClickListener(event -> {});
+        submitBtn.addClickListener(event -> submitSolution());
 
         H1 appTitle = new H1(getTranslation("app_title"));
         appTitle.addClassNames("text-l", "m-m");
@@ -148,6 +137,42 @@ public class AssignmentView extends AppLayout implements BeforeEnterObserver, Ha
         header.addClassNames("py-0", "px-m");
 
         addToNavbar(header);
+    }
+
+    private AssignmentExplorer createAssignmentExplorer() {
+        AssignmentExplorer assignmentExplorer = new AssignmentExplorer(participantData);
+        assignmentExplorer.setSizeFull();
+        assignmentExplorer.registerCallback(participant -> {
+            try {
+                participantData = participantService.saveParticipantData(participant);
+                storeParticipantDataInSession(participantData);
+            } catch (Exception ex) {
+                logger.error("Cannot save participant data");
+                NotificationHelper.displayError(getTranslation("participant_reg_form_error_msg"));
+            }
+        });
+        return assignmentExplorer;
+    }
+
+    private VerticalLayout createSubmittedMessage() {
+        VerticalLayout layout = new VerticalLayout();
+        layout.addClassNames("bordered");
+        layout.setWidth(800, Unit.PIXELS);
+
+        H4 title = new H4(getTranslation("assignment_view_submitted_block_title"));
+        title.getStyle().set("text-align", "center");
+        title.setWidthFull();
+
+        Label errorMsg = new Label(getTranslation("assignment_view_submitted_block_msg"));
+        errorMsg.setWidthFull();
+        errorMsg.getStyle().set("text-align", "center");
+        errorMsg.getStyle().set("color", "green");
+
+        RouterLink goHome = new RouterLink(getTranslation("assignment_view_submitted_block_btn_go_home"), HomeView.class);
+        layout.add(title, errorMsg, goHome);
+        layout.setHorizontalComponentAlignment(FlexComponent.Alignment.CENTER, goHome);
+
+        return layout;
     }
 
     private VerticalLayout createNotFoundMessage() {
@@ -224,6 +249,12 @@ public class AssignmentView extends AppLayout implements BeforeEnterObserver, Ha
         layout.add(registrationForm);
 
         return layout;
+    }
+
+    private void submitSolution() {
+        participantData = participantService.prepareSubmissionsForProcessing(participantData);
+        storeParticipantDataInSession(participantData);
+        UI.getCurrent().getPage().reload();
     }
 
     private void storeParticipantDataInSession(@NotNull Participant participant) {

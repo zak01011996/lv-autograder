@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.validation.constraints.NotNull;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
@@ -45,5 +46,11 @@ public class ParticipantService {
 
     public Participant saveParticipantData(@NotNull Participant participant) {
         return participantRepository.save(participant);
+    }
+
+    public Participant prepareSubmissionsForProcessing(@NotNull Participant participant) {
+        participant.setSubmittedAt(LocalDateTime.now());
+        participant.getSubmissions().forEach(s -> s.setStatus(SubmissionStatus.SUBMITTED));
+        return saveParticipantData(participant);
     }
 }
