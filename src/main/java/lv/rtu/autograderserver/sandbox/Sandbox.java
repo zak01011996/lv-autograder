@@ -3,7 +3,9 @@ package lv.rtu.autograderserver.sandbox;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.async.ResultCallback;
 import com.github.dockerjava.api.command.CreateContainerResponse;
+import com.github.dockerjava.api.command.PullImageResultCallback;
 import com.github.dockerjava.api.model.Frame;
+import com.github.dockerjava.api.model.PullResponseItem;
 import com.github.dockerjava.core.DefaultDockerClientConfig;
 import com.github.dockerjava.core.DockerClientConfig;
 import com.github.dockerjava.core.DockerClientImpl;
@@ -44,13 +46,15 @@ public class Sandbox {
             }
 
             DockerClient dockerClient = DockerClientImpl.getInstance(config, httpClient);
+            dockerClient.pullImageCmd("ubuntu:latest").exec(new PullImageResultCallback()).awaitCompletion();
+
 
             // Run
             CreateContainerResponse container = dockerClient
-                    .createContainerCmd("ubuntu")
+                    .createContainerCmd("ubuntu:latest")
                     .withWorkingDir("/app")
-                    .withCmd("/bin/sh", "-c", "cat /app/project/test.txt")
-                    //.withCmd("/bin/sh", "-c", "ls -ahl project")
+                    // .withCmd("/bin/sh", "-c", "cat /app/project/test.txt")
+                    .withCmd("/bin/sh", "-c", "ls -ahl project")
                     .exec();
 
             String content = "This is test content, hello world!";
@@ -74,8 +78,6 @@ public class Sandbox {
                 }
             }
 
-            System.out.println("CONTAINER_ID: " + container.getId());
-            dockerClient.startContainerCmd(container.getId()).exec();
 
             StringBuilder sb = new StringBuilder();
 
@@ -87,9 +89,9 @@ public class Sandbox {
 
                 @Override
                 public void onNext(Frame object) {
-//                    System.out.println("<- ON NEXT ->");
-//                    System.out.println("<- " + new String(object.getPayload()) + " ->");
-//                    System.out.println("<----------->");
+                    System.out.println("<- ON NEXT ->");
+                    System.out.println("<- " + new String(object.getPayload()) + " ->");
+                    System.out.println("<----------->");
 
                     sb.append(new String(object.getPayload()));
                 }
@@ -114,8 +116,18 @@ public class Sandbox {
                 }
             });
 
+            System.out.println("CONTAINER_ID: " + container.getId());
+            dockerClient.startContainerCmd(container.getId()).exec();
+
+            Thread.sleep(10000);
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }
+    }
+
+    public static void main(String[] args) {
+        Sandbox sb = new Sandbox();
+
+        sb.test();
     }
 }

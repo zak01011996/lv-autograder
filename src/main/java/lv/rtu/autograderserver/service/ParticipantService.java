@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Optional;
 
 @Service
@@ -23,6 +24,7 @@ public class ParticipantService {
 
     public Participant createNewParticipant(@NotNull Participant participant, @NotNull Publication publication) {
         participant.setPublication(publication);
+        participant.setSubmissions(new ArrayList<>());
 
         for (Problem problem : publication.getTask().getProblems()) {
             Submission submission = new Submission();
